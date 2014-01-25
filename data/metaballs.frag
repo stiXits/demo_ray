@@ -85,8 +85,8 @@ bool intersect(
 
 	if(length(rayNormal) < blob.radius)
     {
-        t0 = length((blob.position - rayNormal) - normalize(ray.direction) * sqrt(pow(blob.radius, 2.0) - pow(length(rayNormal), 2.0)));
-        t1 = length((blob.position - rayNormal) + normalize(ray.direction) * sqrt(pow(blob.radius, 2.0) - pow(length(rayNormal), 2.0)));
+        t0 = length((blob.position - rayNormal) - (normalize(ray.direction) * sqrt(pow(blob.radius, 2.0) - pow(length(rayNormal), 2.0))));
+        t1 = length((blob.position - rayNormal) + (normalize(ray.direction) * sqrt(pow(blob.radius, 2.0) - pow(length(rayNormal), 2.0))));
         return true;
     }
 	// Task_5_1 - ToDo End
@@ -117,12 +117,17 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 
 		if(intersect(blobs[i], ray, t0, t1) /* todo, more? */)
 		{
-			t = t0;
-			normal = normalize(blobs[i].position - (ray.origin + t * ray.direction));
-			return true;
+		    if(t0 < t)
+            {
+                t = t0;
+    			t /= length(ray.direction);
+                normal = normalize(blobs[i].position - (ray.origin + t * ray.direction));
+                return true;
+            }
 			// Task 5_2: material = ?;
 		}
 	}
+	normal = vec3(0.0f);
 	return false; // ?
 
 	// ToDo: End Task 5_1

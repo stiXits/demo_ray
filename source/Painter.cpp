@@ -93,8 +93,8 @@ void Painter::reset_5()
 
     float * rawPositions  = new float[size * 4]; // position + radius
     float * rawVelocities = new float[size * 4]; // velocities + dummy (e.g. active)
-    float * rawMaterials0 = new float[size * 4]; 
-    float * rawMaterials1 = new float[size * 4]; 
+    float * rawMaterials0 = new float[size * 4];
+    float * rawMaterials1 = new float[size * 4];
 
     for (int i = 0; i < size; ++i)
     {
@@ -239,7 +239,7 @@ bool Painter::initialize()
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // create write access to buffers 
+    // create write access to buffers
 
     glGenRenderbuffers(1, &m_depth);
     glBindRenderbuffer(GL_RENDERBUFFER, m_depth);
@@ -658,6 +658,7 @@ void Painter::glow(float timef)
 void Painter::paint_5_1(float timef)
 {
     glDisable(GL_DEPTH_TEST);
+    qDebug()<<camera()->zFar();
 
     const float delta = timef - m_elapsed;
     m_elapsed = timef;
