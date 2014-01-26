@@ -1,6 +1,6 @@
 #version 150
 
-const float INFINITY = 1e+4;
+const float INFINITY = 1e+4 ;
 
 const int SIZE = 16;
 const float THRESHOLD = 0.66;
@@ -78,7 +78,7 @@ bool intersect(
         vec3 s = ray.origin;
         vec3 c = blob.position;
 
-        distanceToNormal = - (r.x * (s.x - c.x) + r.y * (s.y - c.y) + r.z * (s.z - c.z))/(pow(2, r.x) + pow(2, r.x) + pow(2, r.z));
+        distanceToNormal = - (r.x * (s.x - c.x) + r.y * (s.y - c.y) + r.z * (s.z - c.z))/(pow(r.x, 2.0) + pow(r.y, 2.0) + pow(r.z, 2.0));
     }
 
 	rayNormal = blob.position - ray.origin - distanceToNormal * normalize(ray.direction);
@@ -120,15 +120,19 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 		    if(t0 < t)
             {
                 t = t0;
-    			t /= length(ray.direction);
-                normal = normalize(blobs[i].position - (ray.origin + t * ray.direction));
-                return true;
             }
 			// Task 5_2: material = ?;
 		}
 	}
-	normal = vec3(0.0f);
-	return false; // ?
+	if(t != INFINITY)
+    {
+        normal = normalize((ray.origin + ray.direction * t0) - blobs[i].position);
+    }
+    else
+    {
+        normal = vec3(0.0f);
+        return false; // ?
+    }
 
 	// ToDo: End Task 5_1
 }

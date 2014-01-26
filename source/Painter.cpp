@@ -658,7 +658,6 @@ void Painter::glow(float timef)
 void Painter::paint_5_1(float timef)
 {
     glDisable(GL_DEPTH_TEST);
-    qDebug()<<camera()->zFar();
 
     const float delta = timef - m_elapsed;
     m_elapsed = timef;
