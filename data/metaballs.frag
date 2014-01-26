@@ -105,8 +105,8 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 	// and false if no when no sphere was hit.
 
 	// (Task_5_2 - ToDo return material of nearest intersected sphere)
-
 	t =  INFINITY;
+	bool hit = false;
 
 	for(int i = 0; i < SIZE; ++i)
 	{
@@ -117,23 +117,26 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 
 		if(intersect(blobs[i], ray, t0, t1) /* todo, more? */)
 		{
-		    if(t0 < t)
+		    if(!hit || t0 >= t)
             {
                 t = t0;
+                normal = ((ray.origin + normalize(ray.direction) * t0) - blobs[i].position);
+                hit = true;
+//                normal = (normalize(ray.direction) * t);
+//                normal = blobs[i].position;
             }
 			// Task 5_2: material = ?;
 		}
 	}
-	if(t != INFINITY)
+	if(hit)
     {
-        normal = normalize((ray.origin + ray.direction * t0) - blobs[i].position);
+        return true;
     }
     else
     {
         normal = vec3(0.0f);
         return false; // ?
     }
-
 	// ToDo: End Task 5_1
 }
 
