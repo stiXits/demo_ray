@@ -35,7 +35,7 @@ void moveParticlesInForceField(
 
 void main()
 {
-	vec4 pos = texelFetch(positions,  ivec2(int(gl_FragCoord.x), int(gl_FragCoord.y)), 0);	
+	vec4 pos = texelFetch(positions,  ivec2(int(gl_FragCoord.x), int(gl_FragCoord.y)), 0);
 	vec4 vel = texelFetch(velocities, ivec2(int(gl_FragCoord.x), int(gl_FragCoord.y)), 0);
 
 	vec4 posOut;

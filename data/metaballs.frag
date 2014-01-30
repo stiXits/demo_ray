@@ -69,36 +69,30 @@ bool intersect(
 	// hint: use ray.origin, ray.direction, blob.position, blob.radius
 	// hint: make it fast (if you like)! ;)
 
-	vec3 rayNormal;
-	float distanceToNormal;
+    vec3 normRay = ray.origin - blob.position;
+
+    float a = dot(ray.direction, ray.direction);
+    float b = 2 * dot(ray.direction, normRay);
+    float c = dot(normRay, normRay) - (blob.radius * blob.radius);
+
+    float disc = b * b - 4 * a * c;
+    if (disc < 0)
+        return false;
 
 
+    float distSqrt = sqrt(disc);
+
+    t0 = (-b - distSqrt)/(2.0*a);
+    t1 = (-b + distSqrt)/(2.0*a);
+
+    if (t0 > t1)
     {
-        vec3 r = ray.direction;
-        vec3 s = ray.origin;
-        vec3 c = blob.position;
-
-        distanceToNormal = - (r.x * (s.x - c.x) + r.y * (s.y - c.y) + r.z * (s.z - c.z))/(pow(r.x, 2.0) + pow(r.y, 2.0) + pow(r.z, 2.0));
+        float temp = t0;
+        t0 = t1;
+        t1 = temp;
     }
 
-	rayNormal = blob.position - ray.origin - distanceToNormal * normalize(ray.direction);
-
-	if(length(rayNormal) < blob.radius)
-    {
-        vec3 pseudoTangent = (normalize(ray.direction) * sqrt(pow(blob.radius, 2.0) - pow(length(rayNormal), 2.0)));
-        t0 = length((blob.position + rayNormal) - pseudoTangent);
-        t1 = length((blob.position + rayNormal) + pseudoTangent);
-
-        if(t1 < t0)
-        {
-            float tmp = t0;
-            t0 = t1;
-            t1 = tmp;
-        }
-        return true;
-    }
-	// Task_5_1 - ToDo End
-	return false;
+	return true;
 }
 
 bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
@@ -123,16 +117,11 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 
 		// ...
 
-		if(intersect(blobs[i], ray, t0, t1) /* todo, more? */)
+		if(intersect(blobs[i], ray, t0, t1) && t0 < t)
 		{
-		    if(!hit || t0 < t)
-            {
-                t = t0;
-//                normal = ((ray.origin + normalize(ray.direction) * t0) - blobs[i].position);
-                hit = true;
-//                normal = (normalize(ray.direction) * t);
-                normal = blobs[i].position;
-            }
+            t = t0;
+                normal = ((ray.origin + normalize(ray.direction) * t0) - blobs[i].position);
+            hit = true;
 			// Task 5_2: material = ?;
 		}
 	}
