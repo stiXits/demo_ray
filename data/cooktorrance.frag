@@ -1,6 +1,7 @@
 #version 150
 
 const float EPSILON  = 1e-6;
+const float c_e = 2.7182;
 
 struct Material
 {
@@ -13,11 +14,9 @@ float fresnel(in float VdotH, in float r)
 {
 	// r: reflectance
 	// Task_5_2 - ToDo Begin
-	
-	// ..
-	
-	return 1.0; 
-	
+
+	return r + (1.0f - r) * pow((1 - VdotH), 5.0f);
+
 	// Task_5_2 - ToDo End
 }
 
@@ -27,23 +26,30 @@ float roughness(in float NdotH, in float r)
 	// r: roughness
 	// Task_5_2 - ToDo Begin
 
-	// ...
+//	float exponent = (pow(NdotH, 2) - 1)/(pow(r, 2) * pow(NdotH, 2));
+//	float base = 1/(pow(r, 2) * pow(NdotH, 4));
+//
+//	return base*exp(exponent);
+	float NdotHSqr = NdotH*NdotH;
+	float divisor = r*r*NdotHSqr;
+	float exponent = (NdotHSqr-1)/divisor;
+	return exp(exponent)/(divisor*NdotHSqr);
 
-	return 1.0;
-	
 	// Task_5_2 - ToDo End
 }
 
-// Geometric attenuation accounts for the shadowing and 
+// Geometric attenuation accounts for the shadowing and
 // self masking of one microfacet by another.
 float geom(in float NdotH, in float NdotV, in float VdotH, in float NdotL)
 {
 	// Task_5_2 - ToDo Begin
 
-	// ...
-	
-    return 1.0;
-	
+    float term1 = (2 * NdotH * NdotV)/VdotH;
+    float term2 = (2 * NdotH * NdotL)/VdotH;
+
+
+    return min(min(1, term1), term2);
+
 	// Task_5_2 - ToDo End
 }
 
@@ -57,13 +63,18 @@ vec3 CookTorrance(in vec3 V, in vec3 N, in vec3 L, in Material m, in vec3 R, in 
 	float NdotL = clamp(dot(N, L), 0.0, 1.0);
 
 	// Task_5_2 - ToDo Begin
-	
+
 	// hint: R is reflection (e.g., ray in envmap)
 
+    float Rs = (fresnel(VdotH, m.sr.a) * roughness(NdotH, m.dr.a)  * geom(NdotH, NdotV, VdotH, NdotL))/(NdotV * NdotL);
+//    float Rs = mix((fresnel(VdotH, m.sr.a) * roughness(NdotH, m.dr.a)  * geom(NdotH, NdotV, VdotH, NdotL))/(NdotV * NdotL) , 0, step(NdotV*NdotL,0.0));
+//
+//    Rs = roughness(NdotH, m.dr.a + 1.0);
 	// geom(...) * fresnel(...) * roughness(...) ...
 	// ...
-
-	return vec3(1.0);
+    vec3 final = max(0, NdotL) * (m.sr.rgb * Rs  + m.dr.rgb);
+    final = vec3(roughness(NdotH, m.dr.a));
+	return final;
 
 	// Task_5_2 - ToDo End
 }

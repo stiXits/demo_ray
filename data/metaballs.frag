@@ -120,9 +120,9 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 		if(intersect(blobs[i], ray, t0, t1) && t0 < t)
 		{
             t = t0;
-                normal = ((ray.origin + normalize(ray.direction) * t0) - blobs[i].position);
+            normal = ((ray.origin + normalize(ray.direction) * t0) - blobs[i].position);
             hit = true;
-			// Task 5_2: material = ?;
+			material = materials[i];
 		}
 	}
 	if(hit)
