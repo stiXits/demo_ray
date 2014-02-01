@@ -26,14 +26,10 @@ float roughness(in float NdotH, in float r)
 	// r: roughness
 	// Task_5_2 - ToDo Begin
 
-//	float exponent = (pow(NdotH, 2) - 1)/(pow(r, 2) * pow(NdotH, 2));
-//	float base = 1/(pow(r, 2) * pow(NdotH, 4));
-//
-//	return base*exp(exponent);
-	float NdotHSqr = NdotH*NdotH;
-	float divisor = r*r*NdotHSqr;
-	float exponent = (NdotHSqr-1)/divisor;
-	return exp(exponent)/(divisor*NdotHSqr);
+	float exponent = (pow(NdotH, 2) - 1)/(pow(r, 2) * pow(NdotH, 2));
+	float base = 1/(pow(r, 2) * pow(NdotH, 4));
+
+	return base*exp(exponent);
 
 	// Task_5_2 - ToDo End
 }
@@ -67,13 +63,8 @@ vec3 CookTorrance(in vec3 V, in vec3 N, in vec3 L, in Material m, in vec3 R, in 
 	// hint: R is reflection (e.g., ray in envmap)
 
     float Rs = (fresnel(VdotH, m.sr.a) * roughness(NdotH, m.dr.a)  * geom(NdotH, NdotV, VdotH, NdotL))/(NdotV * NdotL);
-//    float Rs = mix((fresnel(VdotH, m.sr.a) * roughness(NdotH, m.dr.a)  * geom(NdotH, NdotV, VdotH, NdotL))/(NdotV * NdotL) , 0, step(NdotV*NdotL,0.0));
-//
-//    Rs = roughness(NdotH, m.dr.a + 1.0);
-	// geom(...) * fresnel(...) * roughness(...) ...
-	// ...
-    vec3 final = max(0, NdotL) * (m.sr.rgb * Rs  + m.dr.rgb);
-    final = vec3(roughness(NdotH, m.dr.a));
+    vec3 final = max(0, NdotL) * (m.sr.rgb * Rs  + m.dr.rgb * ambient);
+    final += R * max(0, NdotL);
 	return final;
 
 	// Task_5_2 - ToDo End
