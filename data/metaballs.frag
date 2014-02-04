@@ -139,6 +139,42 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 // ... your helper functions
 
 // ... more ...
+bool nearestIntersection(in Ray ray, float t)
+{
+    float dist = INFINITE;
+    float t0;
+    float t1;
+
+	for(int i = 0; i < SIZE; ++i)
+	{
+        if(intersects(blobs[i], ray, t0, t1) && t0 < dist)
+        {
+            dist = t0;
+        }
+	}
+
+    t = dist;
+	return dist < INFINITY;
+}
+
+bool farthestIntersection()
+{
+    float dist = 0;
+    float t0;
+    float t1;
+
+	for(int i = 0; i < SIZE; ++i)
+	{
+        if(intersects(blobs[i], ray, t0, t1) && t0 > dist)
+        {
+            dist = t0;
+        }
+	}
+
+    t = dist;
+	return dist > INFINITY;
+}
+
 
 bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 {
@@ -157,6 +193,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 	// your shader should terminate!
 
 	// return true if iso surface was hit, fals if not
+
 
 	return false;
 }
