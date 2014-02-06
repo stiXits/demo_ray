@@ -139,42 +139,78 @@ bool rcast(in Ray ray, out vec3 normal, out Material material, out float t)
 // ... your helper functions
 
 // ... more ...
-bool nearestIntersection(in Ray ray, float t)
+bool nearestIntersection(in Ray ray, out float t)
 {
-    float dist = INFINITE;
+    t = INFINITY;
     float t0;
     float t1;
 
 	for(int i = 0; i < SIZE; ++i)
 	{
-        if(intersects(blobs[i], ray, t0, t1) && t0 < dist)
+        if(intersect(blobs[i], ray, t0, t1) && t0 < t)
         {
-            dist = t0;
+            t = t0;
         }
 	}
 
-    t = dist;
-	return dist < INFINITY;
+	return (t < INFINITY);
 }
 
-bool farthestIntersection()
+bool farthestIntersection(in Ray ray, out float t)
 {
-    float dist = 0;
+    t = 0;
     float t0;
     float t1;
 
 	for(int i = 0; i < SIZE; ++i)
 	{
-        if(intersects(blobs[i], ray, t0, t1) && t0 > dist)
+        if(intersect(blobs[i], ray, t0, t1) && t0 > t)
         {
-            dist = t0;
+            t = t0;
         }
 	}
 
-    t = dist;
-	return dist > INFINITY;
+	return (t > 0);
 }
 
+bool getDistance(in vec3 position, in int sphere, out float t)
+{
+    t = sqrt(    pow(blobs[sphere].position.x - position.x, 2) +
+                    pow(blobs[sphere].position.y - position.y, 2) +
+                    pow(blobs[sphere].position.z - position.z, 2)) - blobs[sphere].radius;
+    return true;
+}
+
+bool nearestDistance(in vec3 position, out float t)
+{
+    t = INFINITY;
+    float t0;
+
+	for(int i = 0; i < SIZE; ++i)
+	{
+        if(getDistance(position, i, t0) && t0 < t)
+        {
+            t = t0;
+        }
+	}
+
+	return (t < INFINITY);
+}
+
+bool hitSphere(in vec3 position, out int sphere)
+{
+    float t;
+
+    for(int i = 0; i < SIZE; ++i)
+	{
+        if(getDistance(position, i, t) && (t <= 0))
+        {
+            sphere = i;
+            return true;
+        }
+	}
+    return false;
+}
 
 bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 {
@@ -183,7 +219,15 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 	// find nearest and farthest intersection for all metaballs
 	// hint: use for loop, INFINITE, SIZE, intersect, min and max...
 
-	// ...
+
+
+	float tmin;
+	float tmax;
+
+	if(!farthestIntersection(ray, tmax) || !nearestIntersection(ray, tmin))
+    {
+        return false;
+    }
 
 	// implement raymarching within your tmin and tmax
 	// hint: e.g., use while loop, THRESHOLD, and implment yourself
@@ -193,9 +237,25 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 	// your shader should terminate!
 
 	// return true if iso surface was hit, fals if not
+    float marchedDistance = tmin;
+    float currentStep;
+    bool hit = false;
+    int sphere;
+    Ray marchingRay = ray;
 
+	while(marchedDistance <= tmax && !hit)
+    {
+        nearestDistance(marchingRay.origin, currentStep);
+        marchingRay.origin += currentStep * marchingRay.direction;
+        marchedDistance += currentStep;
+        hit = hitSphere(marchingRay.origin, sphere);
+    }
 
-	return false;
+    material = materials[sphere];
+    normal = normalize(marchingRay.origin - blobs[sphere].position);
+    t = marchedDistance;
+
+	return hit;
 }
 
 // Task_5_3 - ToDo End
