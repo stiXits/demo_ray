@@ -26,6 +26,8 @@ struct Ray
 
 Sphere blobs[16];
 Material materials[16];
+int spheresHit[16];
+int hitcount;
 
 void cache(
 	sampler2D positions
@@ -181,6 +183,18 @@ bool getDistance(in vec3 position, in int sphere, out float t)
     return true;
 }
 
+float dist(in vec3 position, in int sphere)
+{
+    return sqrt(    pow(blobs[sphere].position.x - position.x, 2) +
+                    pow(blobs[sphere].position.y - position.y, 2) +
+                    pow(blobs[sphere].position.z - position.z, 2)) - blobs[sphere].radius;
+}
+
+float energy(in vec3 point, in int sphere)
+{
+    return smoothstep(blobs[blobs[sphere].radius, blobs[blobs[sphere].radius*2, dist(point, sphere));
+}
+
 bool nearestDistance(in vec3 position, out float t)
 {
     t = INFINITY;
@@ -197,19 +211,34 @@ bool nearestDistance(in vec3 position, out float t)
 	return (t < INFINITY);
 }
 
-bool hitSphere(in vec3 position, out int sphere)
+bool countHits(in vec3 position)
 {
     float t;
 
     for(int i = 0; i < SIZE; ++i)
 	{
-        if(getDistance(position, i, t) && (t <= 0.003))
+        if(getDistance(position, i, t) && (t <= blobs[i].radius/2))
         {
-            sphere = i;
+            spheresHit[hitcount] = i;
+            hitcount++;
             return true;
         }
 	}
     return false;
+}
+
+bool foundborder(in vec3 position)
+{
+    float energySum = .0f;
+    for(int i = 0; i < hitcount; i++)
+    {
+        energySum += energy(position, spheresHit[i]);
+    }
+}
+
+float energy(in vec3 position, in int sphere)
+{
+    return smoothstep(blobs[i].radius, 2*blobs[i].radius, );
 }
 
 bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
@@ -218,6 +247,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 
 	// find nearest and farthest intersection for all metaballs
 	// hint: use for loop, INFINITE, SIZE, intersect, min and max...
+	hitcount = 0;
 
 	float tmin;
 	float tmax;
@@ -245,7 +275,8 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         nearestDistance(marchingRay.origin, currentStep);
         marchingRay.origin += currentStep * marchingRay.direction;
         marchedDistance += currentStep;
-        hit = hitSphere(marchingRay.origin, sphere);
+        countHits(marchingRay.origin);
+        hit = hitSpheres(marchingRay.origin, sphere);
     }
 
     material = materials[sphere];
