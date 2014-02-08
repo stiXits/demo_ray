@@ -203,7 +203,7 @@ bool hitSphere(in vec3 position, out int sphere)
 
     for(int i = 0; i < SIZE; ++i)
 	{
-        if(getDistance(position, i, t) && (t <= 0))
+        if(getDistance(position, i, t) && (t <= 0.003))
         {
             sphere = i;
             return true;
@@ -219,15 +219,12 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 	// find nearest and farthest intersection for all metaballs
 	// hint: use for loop, INFINITE, SIZE, intersect, min and max...
 
-
-
 	float tmin;
 	float tmax;
 
-	if(!farthestIntersection(ray, tmax) || !nearestIntersection(ray, tmin))
-    {
-        return false;
-    }
+    farthestIntersection(ray, tmax);
+    nearestIntersection(ray, tmin);
+
 
 	// implement raymarching within your tmin and tmax
 	// hint: e.g., use while loop, THRESHOLD, and implment yourself
@@ -237,7 +234,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 	// your shader should terminate!
 
 	// return true if iso surface was hit, fals if not
-    float marchedDistance = tmin;
+    float marchedDistance = 0;
     float currentStep;
     bool hit = false;
     int sphere;
@@ -253,9 +250,9 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 
     material = materials[sphere];
     normal = normalize(marchingRay.origin - blobs[sphere].position);
-    t = marchedDistance;
+    t = ray.origin + marchedDistance * ray.direction;
 
-	return hit;
+    return hit;
 }
 
 // Task_5_3 - ToDo End

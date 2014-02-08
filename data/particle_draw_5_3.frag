@@ -43,52 +43,30 @@ vec3 CookTorrance(in vec3 V, in vec3 N, in vec3 L, in Material m, in vec3 R, in 
 void main()
 {
 	cache(positions, materials0, materials1); // cache blob and brdf texel fetches
-	
-	Ray ray[3];
-	vec3 h[2];
+
+	Ray ray;
 
 	// initial ray
-	ray[0].origin    = eye;
-	ray[0].direction = normalize(v_sky);
-	
-	vec3 	 l = normalize(light); // -ray[0].direction; 
-	vec3     n[2];
-	Material m[2];
+	ray.origin    = eye;
+	ray.direction = normalize(v_sky);
 
+	Material m; // dummy material - no used
+
+	vec3 n; // normal
 	float t;
+
 	vec3 c;
-	
-	float lum = 0.0;
-	
-	// Task_5_3 - ToDo Begin
-	// The following code is just a suggestion, feel free to adjust or modify it!
 
-	if(trace(ray[0], n[0], m[0], t))
+	if(trace(ray, n, m, t))
 	{
-		vec3 v[2];
+		vec3 v = -ray.direction;; // view
 
-		// ...
-
-		// e.g. use ray[1]... ray[2]...
-		
-		vec3 R;
-	
-		if(trace(ray[1], n[1], m[1], t))
-		{
-			R = vec3(0.0); // CookTorrance(...);
-		}
-		else
-			R = texture(envmap, ray[1].direction).xyz;
-
-		c = vec3(0.0); // CookTorrance(...);
+		vec3 l = light;
+		vec3 R = texture(envmap, reflect(ray.direction, n)).xyz;
+		c = CookTorrance(v, n, l, m, R, ambient);
 	}
 	else
-	{
-		c = texture(envmap, ray[0].direction).xyz;
-		// lum = ;
-	}	
-	
-	// Task_5_3 - ToDo End
-	
-	fragColor = vec4(c, lum);
+		c = texture(envmap, ray.direction).xyz;
+
+	fragColor = vec4(c, 1.0);
 }
