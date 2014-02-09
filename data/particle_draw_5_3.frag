@@ -59,7 +59,7 @@ void main()
 
 	if(trace(ray, n, m, t))
 	{
-		vec3 v = -ray.direction;; // view
+		vec3 v = -ray.direction; // view
 
 		vec3 l = light;
 		vec3 R = texture(envmap, reflect(ray.direction, n)).xyz;
