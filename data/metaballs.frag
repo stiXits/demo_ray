@@ -26,7 +26,7 @@ struct Ray
 
 Sphere blobs[16];
 Material materials[16];
-int spheresHit[16];
+int sphereHit[16];
 int hitcount;
 
 void cache(
@@ -177,9 +177,9 @@ bool farthestIntersection(in Ray ray, out float t)
 
 float dist(in vec3 position, in int sphere)
 {
-    return sqrt(    pow(blobs[sphere].position.x - position.x, 2) +
-                    pow(blobs[sphere].position.y - position.y, 2) +
-                    pow(blobs[sphere].position.z - position.z, 2)) - blobs[sphere].radius;
+    return sqrt(    pow(position.x - blobs[sphere].position.x, 2) +
+                    pow(position.y - blobs[sphere].position.y, 2) +
+                    pow(position.z - blobs[sphere].position.z, 2)) - blobs[sphere].radius;
 }
 
 bool nearestDistance(in vec3 position, out float t)
@@ -199,61 +199,61 @@ bool nearestDistance(in vec3 position, out float t)
 	return (t < INFINITY);
 }
 
+float energy(in vec3 position, in int sphere)
+{
+    return (-1)*(smoothstep(1.1*blobs[sphere].radius, blobs[sphere].radius, dist(position, sphere)) - 1);
+//    float d = dist(position, sphere);
+//    if(d > 2*blobs[sphere].radius)
+//        return 0;
+//
+//    return -1*(d - 2*blobs[sphere].radius);
+}
+
 void countHits(in vec3 position)
 {
     float t;
 
     for(int i = 0; i < SIZE; ++i)
 	{
-        if(dist(position, i) <= blobs[i].radius*2)
+        if(energy(position, i) > 0.0f)
         {
-            spheresHit[hitcount] = i;
-            hitcount++;
+            if(sphereHit[i] != 1)
+                hitcount++;
+            sphereHit[i] = 1;
+        }
+        else
+        {
+            sphereHit[i] = 0;
         }
 	}
 }
 
-
-float energy(in vec3 position, in int sphere)
-{
-    return (-1)*(smoothstep(blobs[sphere].radius, 2*blobs[sphere].radius, dist(position, sphere)) - 1);
-}
-
 float energySum(in vec3 position)
 {
-//    float energySum = .0f;
-//    for(int i = 0; i < hitcount; i++)
-//    {
-//        energySum += energy(position, spheresHit[i]);
-//    }
-//    return energySum;    float energySum = .0f;
-    for(int i = 0; i < hitcount; i++)
+    float energySum = 0.0f;
+    for(int i = 0; i <= SIZE - 1; i++)
     {
-        energySum += energy(position, spheresHit[i]);
+        if(sphereHit[i] == 1)
+            energySum += energy(position, i);
     }
     return energySum;
-}
-
-bool foundBorder(in vec3 position)
-{
-    if(energySum(position) >= 0.1f)
-        return true;
-    else
-        return false;
+////    if(hitcount <0)
+////        return 0.0f;
+////    return energy(position, spheresHit[hitcount]);
 }
 
 void interp(in vec3 pos, out vec3 normal, out Material material)
 {
-    if(hitcount > 0)
-    {
-        material.sr = mix(materials[spheresHit[0]].sr, materials[spheresHit[1]].sr, vec4(0.5));
-        material.dr = mix(materials[spheresHit[0]].sr, materials[spheresHit[1]].sr, vec4(0.5));
-    }
-    else
-        material = materials[spheresHit[0]];
-
-    Sphere blobby = blobs[spheresHit[0]];
-    normal = normalize(pos - blobby.position);
+//    if(hitcount > 0)
+//    {
+//        material.sr = mix(materials[spheresHit[0]].sr, materials[spheresHit[1]].sr, vec4(0.5));
+//        material.dr = mix(materials[spheresHit[0]].sr, materials[spheresHit[1]].sr, vec4(0.5));
+//    }
+//    else
+//        material = materials[spheresHit[0]];
+//
+//    Sphere blobby = blobs[spheresHit[0]];
+//    normal = normalize(pos - blobby.position);
 
 }
 
@@ -263,7 +263,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 
 	// find nearest and farthest intersection for all metaballs
 	// hint: use for loop, INFINITE, SIZE, intersect, min and max...
-	hitcount = 0;
+	hitcount = -1;
 
 	float tmin;
 	float tmax;
@@ -294,28 +294,30 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 //        countHits(marchingRay.origin);
 //        hit = foundBorder(marchingRay.origin);
 //    }
-    for(int i = 0; i < 30 && marchedDistance <= tmax && !hit; i++)
+
+    currentStep = 0.1f;
+    for(int i = 0; i < 60 && marchedDistance <= tmax; i++)
     {
-        nearestDistance(marchingRay.origin, currentStep);
-//        if(currentStep > 5.0f)
-            currentStep = 1.0f;
         marchingRay.origin += currentStep * marchingRay.direction;
         marchedDistance += currentStep;
         countHits(marchingRay.origin);
-        hit = energySum(marchingRay.origin) >= 0.2f;
-    }
-//    while(energySum(marchingRay.origin) >= 0.8f)
-//    {
-//        currentStep = +0.01f;
-//        marchingRay.origin -= currentStep * marchingRay.direction;
-//        marchedDistance -= currentStep;
-////    }
-//    hit = energySum(marchingRay.origin) >= 0.1f && energySum(marchingRay.origin) < 1.0f;
-//    interp(marchingRay.origin, normal, material);
-    t = marchedDistance;
-//    material = materials[0];
 
-    return hit;
+        if(energySum(marchingRay.origin) >= 16.3)
+            return true;
+//        return true;
+    }
+
+//    currentStep = -0.001;
+//    for(int i = 0; i < 100 && energySum(marchingRay.origin) > 1.0; i++)
+//    {
+//        marchingRay.origin += currentStep * marchingRay.direction;
+//        marchedDistance += currentStep;
+////        countHits(marchingRay.origin);
+//    }
+
+
+    return false;
+
 }
 
 // Task_5_3 - ToDo End

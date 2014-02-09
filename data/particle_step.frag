@@ -8,8 +8,8 @@ uniform float elapsed; // time delta
 out vec4 fboPositions;
 out vec4 fboVelocities;
 
-const float gravity  = 0.9;
-const float friction = 0.1;
+const float gravity  = 0.5;
+const float friction = 0.0;
 
 void moveParticlesInForceField(
 	in vec4 in_position
