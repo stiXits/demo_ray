@@ -10,18 +10,18 @@ const float sigma = 4.0;
 
 void main()
 {
-	float u = v_uv.x;
-	float v = v_uv.y;
+	float u = v_uv.x/80.0;
+	float v = v_uv.y/80.0;
 
 	// Task_5_4 - ToDo Begin
 
 	// ...
 
     vec4 sum = texture(source, vec2(u, v));
-    
+
 	// ...
-    
+
     fragColor = sum;
-	
+
 	// Task_5_4 - ToDo End
 }

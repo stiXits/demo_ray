@@ -201,12 +201,12 @@ bool nearestDistance(in vec3 position, out float t)
 
 float energy(in vec3 position, in int sphere)
 {
-    return (-1)*(smoothstep(1.1*blobs[sphere].radius, blobs[sphere].radius, dist(position, sphere)) - 1);
-//    float d = dist(position, sphere);
-//    if(d > 2*blobs[sphere].radius)
-//        return 0;
-//
-//    return -1*(d - 2*blobs[sphere].radius);
+//    return (-1)*(smoothstep(blobs[sphere].radius, 1.3*blobs[sphere].radius, dist(position, sphere)) - 1);
+    float d = sqrt(dist(position, sphere));
+    if(d > 2*blobs[sphere].radius)
+        return 0;
+
+    return -1*(d - 2*blobs[sphere].radius);
 }
 
 void countHits(in vec3 position)
@@ -244,16 +244,16 @@ float energySum(in vec3 position)
 
 void interp(in vec3 pos, out vec3 normal, out Material material)
 {
-//    if(hitcount > 0)
-//    {
-//        material.sr = mix(materials[spheresHit[0]].sr, materials[spheresHit[1]].sr, vec4(0.5));
-//        material.dr = mix(materials[spheresHit[0]].sr, materials[spheresHit[1]].sr, vec4(0.5));
-//    }
-//    else
-//        material = materials[spheresHit[0]];
-//
-//    Sphere blobby = blobs[spheresHit[0]];
-//    normal = normalize(pos - blobby.position);
+    if(hitcount > 0)
+    {
+        material.sr = mix(materials[0].sr, materials[1].sr, vec4(0.5));
+        material.dr = mix(materials[0].sr, materials[0].sr, vec4(0.5));
+    }
+    else
+        material = materials[0];
+
+    Sphere blobby = blobs[0];
+    normal = normalize(pos - blobby.position);
 
 }
 
@@ -295,29 +295,38 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 //        hit = foundBorder(marchingRay.origin);
 //    }
 
-    currentStep = 0.1f;
-    for(int i = 0; i < 60 && marchedDistance <= tmax; i++)
+    currentStep = 0.2;
+    for(int i = 0; marchedDistance <= tmax && energySum(marchingRay.origin) <= 0.0; i++)
+    {
+        countHits(marchingRay.origin);
+        nearestDistance(marchingRay.origin, currentStep);
+//        if(currentStep > 0.2)
+//            currentStep = 0.4f;
+        marchingRay.origin += currentStep * marchingRay.direction;
+        marchedDistance += currentStep;
+        countHits(marchingRay.origin);
+    }
+    currentStep = -0.01;
+    for(int i = 0; i < 30 && energySum(marchingRay.origin) > 1.0; i++)
     {
         marchingRay.origin += currentStep * marchingRay.direction;
         marchedDistance += currentStep;
         countHits(marchingRay.origin);
-
-        if(energySum(marchingRay.origin) >= 16.3)
-            return true;
-//        return true;
+    }
+    if(hitcount == -1)
+    {
+        normal = vec3(0.0);
+        return false;
     }
 
-//    currentStep = -0.001;
-//    for(int i = 0; i < 100 && energySum(marchingRay.origin) > 1.0; i++)
-//    {
-//        marchingRay.origin += currentStep * marchingRay.direction;
-//        marchedDistance += currentStep;
-////        countHits(marchingRay.origin);
-//    }
+    if(energySum(marchingRay.origin) < 0.8f)
+    {
+        normal = vec3(energySum(marchingRay.origin));
+        return false;
+    }
 
-
-    return false;
-
+    normal = vec3(0.0);
+    return true;
 }
 
 // Task_5_3 - ToDo End

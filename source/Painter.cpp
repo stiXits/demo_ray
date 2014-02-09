@@ -224,7 +224,7 @@ bool Painter::initialize()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(2, m_glows);
@@ -235,7 +235,7 @@ bool Painter::initialize()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -612,7 +612,7 @@ void Painter::glow(float timef)
     if (!program->isLinked())
         return;
 
-    glViewport(0, 0, camera()->viewport().width() / 2, camera()->viewport().height() / 2);
+    glViewport(0, 0, 1024, 1024);
 
     program->bind();
     m_quad->draw(*this);
@@ -643,7 +643,7 @@ void Painter::glow(float timef)
     if (!program->isLinked())
         return;
 
-    glViewport(0, 0, camera()->viewport().width(), camera()->viewport().height());
+    glViewport(0, 0, 1024, 1024);
 
     program->bind();
     m_quad->draw(*this);
