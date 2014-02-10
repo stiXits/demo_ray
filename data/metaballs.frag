@@ -237,9 +237,6 @@ float energySum(in vec3 position)
             energySum += energy(position, i);
     }
     return energySum;
-////    if(hitcount <0)
-////        return 0.0f;
-////    return energy(position, spheresHit[hitcount]);
 }
 
 void interp(in vec3 pos, out vec3 normal, out Material material)
@@ -295,8 +292,8 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 //        hit = foundBorder(marchingRay.origin);
 //    }
 
-    currentStep = 0.2;
-    for(int i = 0; marchedDistance <= tmax && energySum(marchingRay.origin) <= 0.0; i++)
+    currentStep = 0.3;
+    for(int i = 0; marchedDistance <= tmax && energySum(marchingRay.origin) <= 0.0f; i++)
     {
         countHits(marchingRay.origin);
         nearestDistance(marchingRay.origin, currentStep);
@@ -319,7 +316,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         return false;
     }
 
-    if(energySum(marchingRay.origin) < 0.8f)
+    if(energySum(marchingRay.origin) <= 2.0f)
     {
         normal = vec3(energySum(marchingRay.origin));
         return false;

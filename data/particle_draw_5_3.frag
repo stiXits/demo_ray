@@ -68,5 +68,5 @@ void main()
 	else
 		c = texture(envmap, ray.direction).xyz;
 
-	fragColor = vec4(c, 1.0);
+	fragColor = vec4(n, 1.0);
 }
