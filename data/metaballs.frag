@@ -203,32 +203,12 @@ bool nearestDistance(in vec3 position, out float t)
 
 float energy(in vec3 position, in int sphere)
 {
-//    return (-1)*(smoothstep(blobs[sphere].radius, 1.8*blobs[sphere].radius, dist(position, sphere)) - 1);
-    float d = sqrt(dist(position, sphere));
-    if(d > 2*blobs[sphere].radius)
-        return 0;
-
-    return -1*(d - 2*blobs[sphere].radius);
-}
-
-void countHits(in vec3 position)
-{
-    float t;
-
-    for(int i = 0; i < SIZE; ++i)
-	{
-        if(energy(position, i) > 0.0f)
-        {
-            if(sphereHit[i] != 1)
-                hitcount++;
-            sphereHit[i] = 1;
-//            return;
-        }
-        else
-        {
-            sphereHit[i] = 0;
-        }
-	}
+    return (-1)*(smoothstep(blobs[sphere].radius, 2.5*blobs[sphere].radius, dist(position, sphere)) - 1);
+//    float d = dist(position, sphere);
+//    if(d > 2*blobs[sphere].radius)
+//        return 0;
+//
+//    return -1*(d - 2*blobs[sphere].radius);
 }
 
 float energySum(in vec3 position)
@@ -236,7 +216,6 @@ float energySum(in vec3 position)
     float energySum = 0.0f;
     for(int i = 0; i < SIZE; ++i)
     {
-//        if(sphereHit[i] == 1)
             energySum += energy(position, i);
     }
     return energySum;
@@ -286,47 +265,41 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
     int sphere;
     Ray marchingRay = ray;
 
-    currentStep = 1.0 ;
-    float direction;
+    currentStep = 5.0 ;
+    int direction = 1;
     int steps = 0;
     float nrj = 0;
 
     for(int i = 0; i < 30 ; i++)
     {
-//        countHits(marchingRay.origin);
-//        nearestDistance(marchingRay.origin, currentStep);
-        marchingRay.origin += currentStep * marchingRay.direction;
-        marchedDistance += currentStep;
-//        countHits(marchingRay.origin);
-        steps++;
-        nrj = energySum(marchingRay.origin);
-        if(nrj > 0.5f)
-            break;
-    }
-
-    currentStep = 0.01;
-//
-//    if(nrj > 0.5)
-//        direction = -1;
-//    else
-        direction = 1;
-
-    for(int i = 0; i < 1 ; i++)
-    {
         nearestDistance(marchingRay.origin, currentStep);
+        currentStep -= 1.0;
+        if(i%2 == 0)
+            currentStep -= 0.5;
+        if(i%3 == 0)
+            currentStep -= 0.25;
         marchingRay.origin += currentStep * marchingRay.direction * direction;
         marchedDistance += currentStep;
         steps++;
-        if(energySum(marchingRay.origin) > 1.0f)
+        nrj = energySum(marchingRay.origin);
+        if(nrj > THRESHOLD)
             break;
     }
-
+    currentStep = 0.1;
+    direction -1;
+    for(int i = 0; i < 10 ; i++)
+    {
+        marchingRay.origin += currentStep * marchingRay.direction * direction;
+        marchedDistance += currentStep;
+        nrj = energySum(marchingRay.origin);
+        if(nrj == THRESHOLD)
+            break;
+    }
+//
+//    if(nrj <= THRESHOLD)
+//        return false;
 
     normal = vec3(energySum(marchingRay.origin));
-    if(steps == 39)
-    {
-        return false;
-    }
     return true;
 
 }
