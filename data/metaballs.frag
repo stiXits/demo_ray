@@ -234,7 +234,7 @@ void countHits(in vec3 position)
 float energySum(in vec3 position)
 {
     float energySum = 0.0f;
-    for(int i = 0; i <= SIZE - 1; i++)
+    for(int i = 0; i < SIZE; ++i)
     {
 //        if(sphereHit[i] == 1)
             energySum += energy(position, i);
@@ -286,9 +286,12 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
     int sphere;
     Ray marchingRay = ray;
 
-    currentStep = 0.1;
+    currentStep = 1.0 ;
+    float direction;
     int steps = 0;
-    for(int i = 0; i < 40 && marchedDistance <= tmax; i++)
+    float nrj = 0;
+
+    for(int i = 0; i < 30 ; i++)
     {
 //        countHits(marchingRay.origin);
 //        nearestDistance(marchingRay.origin, currentStep);
@@ -296,27 +299,36 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         marchedDistance += currentStep;
 //        countHits(marchingRay.origin);
         steps++;
-        if(energySum(marchingRay.origin) >= 0.1f)
+        nrj = energySum(marchingRay.origin);
+        if(nrj > 0.5f)
+            break;
+    }
+
+    currentStep = 0.01;
+//
+//    if(nrj > 0.5)
+//        direction = -1;
+//    else
+        direction = 1;
+
+    for(int i = 0; i < 1 ; i++)
+    {
+        nearestDistance(marchingRay.origin, currentStep);
+        marchingRay.origin += currentStep * marchingRay.direction * direction;
+        marchedDistance += currentStep;
+        steps++;
+        if(energySum(marchingRay.origin) > 1.0f)
             break;
     }
 
 
-    normal = vec3(marchedDistance/10);
-//    normal = vec3(steps/3.0f);
-//        normal = vec3(energySum(marchingRay.origin));
-//    if(marchedDistance >= tmax)
-    if(energySum(marchingRay.origin) == 0.0f)
+    normal = vec3(energySum(marchingRay.origin));
+    if(steps == 39)
     {
-        normal += vec3(0.4, 0.0, 0.0);
-//        return true;
+        return false;
     }
     return true;
-//    if(energySum(marchingRay.origin) >= 0.473f)
-//    {
-//        return true;
-//    }
-//
-//    return false;
+
 }
 
 // Task_5_3 - ToDo End
