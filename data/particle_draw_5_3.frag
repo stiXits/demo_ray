@@ -66,7 +66,10 @@ void main()
 		c = CookTorrance(v, n, l, m, R, ambient);
 	}
 	else
+    {
 		c = texture(envmap, ray.direction).xyz;
+		n = vec3(0.f);
+    }
 
 	fragColor = vec4(n, 1.0);
 }
