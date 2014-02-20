@@ -203,7 +203,7 @@ bool nearestDistance(in vec3 position, out float t)
 
 float energy(in vec3 position, in int sphere)
 {
-    return (-1)*(smoothstep(blobs[sphere].radius, 2*blobs[sphere].radius, dist(position, sphere)) - 1.0);
+    return (-1)*(smoothstep(0, 4, dist(position, sphere) - blobs[sphere].radius) - 1.03);
 //    float d = dist(position, sphere);
 //    if(d > 2*blobs[sphere].radius)
 //        return 0;
@@ -270,7 +270,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
     int steps = 0;
     float nrj = 0;
 
-    for(int i = 0; i < 20 ; i++)
+    for(int i = 0; i <20 ; i++)
     {
         nearestDistance(marchingRay.origin, currentStep);
         currentStep -= 1.1;
@@ -279,22 +279,24 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         marchedDistance += currentStep;
         steps++;
         nrj = energySum(marchingRay.origin);
-        if(nrj > THRESHOLD )
-            break;
+//        if(nrj > THRESHOLD )
+//            break;
     }
     currentStep = 0.9;
     direction -1;
-    for(int i = 0; i < 1 ; i++)
+    for(int i = 0; i < 2 ; i++)
     {
         marchingRay.origin += currentStep * marchingRay.direction * direction;
         marchedDistance += currentStep;
         nrj = energySum(marchingRay.origin);
+          if(nrj < THRESHOLD )
+            break;
     }
-//
-//    if(nrj <= THRESHOLD)
-//        return false;
 
-    normal = vec3(nrj);
+    if(nrj <= THRESHOLD)
+        return false;
+
+    interp(marchingRay.origin, normal, material);
     return true;
 
 }
