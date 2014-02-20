@@ -184,10 +184,11 @@ float dist(in vec3 position, in int sphere)
     return sqrt(dot(d,d));
 }
 
-bool nearestDistance(in vec3 position, out float t)
+int nearestDistance(in vec3 position, out float t)
 {
     t = INFINITY;
     float t0;
+    int sphere = -1;
 
 	for(int i = 0; i < SIZE; ++i)
 	{
@@ -195,15 +196,16 @@ bool nearestDistance(in vec3 position, out float t)
         if(t0 < t)
         {
             t = t0;
+            sphere = i;
         }
 	}
 
-	return (t < INFINITY);
+	return sphere;
 }
 
 float energy(in vec3 position, in int sphere)
 {
-    return (-1)*(smoothstep(0, 4, dist(position, sphere) - blobs[sphere].radius) - 1.03);
+    return (-1)*(smoothstep(0, 5, dist(position, sphere) - blobs[sphere].radius) - 1.02);
 //    float d = dist(position, sphere);
 //    if(d > 2*blobs[sphere].radius)
 //        return 0;
@@ -223,16 +225,20 @@ float energySum(in vec3 position)
 
 void interp(in vec3 pos, out vec3 normal, out Material material)
 {
+    //get the hit sphere
+    float x;
+    int sphere = nearestDistance(pos, x);
+
     if(hitcount > 0)
     {
         material.sr = mix(materials[0].sr, materials[1].sr, vec4(0.5));
         material.dr = mix(materials[0].sr, materials[0].sr, vec4(0.5));
     }
     else
-        material = materials[0];
+        material = materials[sphere];
 
-    Sphere blobby = blobs[0];
-    normal = normalize(pos - blobby.position);
+    Sphere blobby = blobs[sphere];
+    normal = normalize(blobby.position - pos);
 
 }
 
@@ -273,16 +279,16 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
     for(int i = 0; i <20 ; i++)
     {
         nearestDistance(marchingRay.origin, currentStep);
-        currentStep -= 1.1;
+        currentStep -= 1.8/2*THRESHOLD;
 
         marchingRay.origin += currentStep * marchingRay.direction * direction;
         marchedDistance += currentStep;
         steps++;
         nrj = energySum(marchingRay.origin);
-//        if(nrj > THRESHOLD )
-//            break;
+        if(nrj > THRESHOLD*20 )
+            break;
     }
-    currentStep = 0.9;
+    currentStep =0.6;
     direction -1;
     for(int i = 0; i < 2 ; i++)
     {
@@ -297,6 +303,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         return false;
 
     interp(marchingRay.origin, normal, material);
+
     return true;
 
 }

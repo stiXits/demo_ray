@@ -71,5 +71,5 @@ void main()
 		n = vec3(0.f);
     }
 
-	fragColor = vec4(n, 1.0);
+	fragColor = vec4(c, 1.0);
 }
