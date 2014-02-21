@@ -235,7 +235,7 @@ void countHits(in vec3 position)
 {
     for(int i = 0; i < SIZE; ++i)
     {
-        if(energy(position, i) > THRESHOLD)
+        if(energy(position, i) > 0)
         {
             sphereHit[i] = 1;
         }
@@ -267,12 +267,10 @@ void interp(in vec3 pos, out vec3 normal, out Material material)
     {
         if(sphereHit[i] == 1)
         {
-            normal += normalize(pos - blobs[sphere].position);
+            normal += pos - blobs[sphere].position;
+            normal = normalize(normal);
         }
     }
-
-  normal = normalize(normal);
-
 }
 
 bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
@@ -309,7 +307,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
     int steps = 0;
     float nrj = 0;
 
-    for(int i = 0; i <20 ; i++)
+    for(int i = 0; i < 20 ; i++)
     {
         nearestDistance(marchingRay.origin, currentStep);
         currentStep -= 1.8/2*THRESHOLD;
@@ -318,8 +316,8 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         marchedDistance += currentStep;
         steps++;
         nrj = energySum(marchingRay.origin);
-        if(nrj > THRESHOLD*20 )
-            break;
+//        if(nrj == THRESHOLD*20 )
+//            break;
     }
 
     if(nrj <= THRESHOLD)
@@ -331,16 +329,12 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         marchingRay.origin += currentStep * marchingRay.direction * direction;
         marchedDistance += currentStep;
         nrj = energySum(marchingRay.origin);
-          if(nrj < THRESHOLD )
-            break;
+//          if(nrj == THRESHOLD*20 )
+//            break;
     }
 
-
-//    interp(ray.origin + marchedDistance * ray.direction, normal, material);
     interp(ray.origin + ray.direction * (marchedDistance - 1.2), normal, material);
-//    normal = normalize(blobs[nearestDistance(marchingRay.origin, currentStep)].position - (ray.origin + marchedDistance * ray.direction));
-//    normal = normalize(ray.origin + ray.direction * (marchedDistance - 1.2) - blobs[nearestDistance(marchingRay.origin, currentStep)].position);
-
+//    normal = vec3((marchedDistance - 1.2)/3);
     return true;
 
 }
