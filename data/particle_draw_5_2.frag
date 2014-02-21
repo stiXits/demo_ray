@@ -41,7 +41,7 @@ vec3 CookTorrance(in vec3 V, in vec3 N, in vec3 L, in Material m, in vec3 R, in 
 void main()
 {
 	cache(positions, materials0, materials1); // cache blob and brdf texel fetches
-	
+
 	Ray ray;
 
 	// initial ray
@@ -49,7 +49,7 @@ void main()
 	ray.direction = normalize(v_sky);
 
 	Material m; // dummy material - no used
-		
+
 	vec3 n; // normal
 	float t;
 

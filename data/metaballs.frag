@@ -166,9 +166,9 @@ bool farthestIntersection(in Ray ray, out float t)
 
 	for(int i = 0; i < SIZE; ++i)
 	{
-        if(intersect(blobs[i], ray, t0, t1) && t0 > t)
+        if(intersect(blobs[i], ray, t0, t1) && t1 > t)
         {
-            t = t0;
+            t = t1;
         }
 	}
 
@@ -216,11 +216,33 @@ float energy(in vec3 position, in int sphere)
 float energySum(in vec3 position)
 {
     float energySum = 0.0f;
+    float tmp;
     for(int i = 0; i < SIZE; ++i)
     {
-            energySum += energy(position, i);
+        tmp = energy(position, i);
+//        if(tmp > 0)
+//        {
+//            sphereHit[i] = 1;
+            energySum += tmp;
+//        }
+//        else
+//            sphereHit[i] = 0;
     }
     return energySum;
+}
+
+void countHits(in vec3 position)
+{
+    for(int i = 0; i < SIZE; ++i)
+    {
+        if(energy(position, i) > THRESHOLD)
+        {
+            sphereHit[i] = 1;
+        }
+        else
+            sphereHit[i] = 0;
+    }
+
 }
 
 void interp(in vec3 pos, out vec3 normal, out Material material)
@@ -228,6 +250,7 @@ void interp(in vec3 pos, out vec3 normal, out Material material)
     //get the hit sphere
     float x;
     int sphere = nearestDistance(pos, x);
+    normal = vec3(0,0,0);
 
     if(hitcount > 0)
     {
@@ -238,7 +261,17 @@ void interp(in vec3 pos, out vec3 normal, out Material material)
         material = materials[sphere];
 
     Sphere blobby = blobs[sphere];
-    normal = normalize(blobby.position - pos);
+
+    countHits(pos);
+    for(int i = 0; i < SIZE; ++i)
+    {
+        if(sphereHit[i] == 1)
+        {
+            normal += normalize(pos - blobs[sphere].position);
+        }
+    }
+
+  normal = normalize(normal);
 
 }
 
@@ -254,7 +287,7 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
 	float tmax;
 
     farthestIntersection(ray, tmax);
-    nearestIntersection(ray, tmin);
+//    nearestIntersection(ray, tmin);
 
 
 	// implement raymarching within your tmin and tmax
@@ -288,6 +321,9 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
         if(nrj > THRESHOLD*20 )
             break;
     }
+
+    if(nrj <= THRESHOLD)
+        return false;
     currentStep =0.6;
     direction -1;
     for(int i = 0; i < 2 ; i++)
@@ -299,10 +335,11 @@ bool trace(in Ray ray, out vec3 normal, out Material material, out float t)
             break;
     }
 
-    if(nrj <= THRESHOLD)
-        return false;
 
-    interp(marchingRay.origin, normal, material);
+//    interp(ray.origin + marchedDistance * ray.direction, normal, material);
+    interp(ray.origin + ray.direction * (marchedDistance - 1.2), normal, material);
+//    normal = normalize(blobs[nearestDistance(marchingRay.origin, currentStep)].position - (ray.origin + marchedDistance * ray.direction));
+//    normal = normalize(ray.origin + ray.direction * (marchedDistance - 1.2) - blobs[nearestDistance(marchingRay.origin, currentStep)].position);
 
     return true;
 
